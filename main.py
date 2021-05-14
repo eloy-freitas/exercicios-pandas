@@ -27,14 +27,8 @@ if __name__ == '__main__':
     print("\nexercicio 5\n",df.dtypes)
 
     #exercicio 6
-    def corrigirdata(data):
-        ano = int(data[:4])
-        mes = int(data[4: 6])
-        dia = int(data[6: 8])
-        return datetime.datetime(ano, mes, dia)
-
-    df['data'] = list(map(corrigirdata, df['data']))
-    print("\nexercicio 6:\n",df['data'].dtypes)
+    df['data'] = pd.to_datetime(df['data'])
+    print("\nexercicio 6:\n",df['data'].dtype)
 
     #exercicio 7
     df["analise"] = 2021
@@ -57,14 +51,11 @@ if __name__ == '__main__':
     df.pop('metragem da casa.1')
 
     #exercicio 10
-    def corrigirvalor(valor):
-        return int(float(valor.replace(',', '.')))
-
-    df['banheiros'] = list(map(corrigirvalor, df['banheiros']))
+    df['banheiros'] =  df['banheiros'].apply(lambda x:x.replace(',','.')).astype('float').astype('int64')
     print("\nexercicio 10\n", df['banheiros'])
     
     #exercicio 11
-    print("\nexercicio 11: \n", df[df['ano de construcao'] < 2000])
+    print("\nexercicio 11: \n", df.query('`ano de construcao` < 2000')['ano de construcao'])
 
     #exercicio 12
     df.rename(columns={'data': 'DT_REFERENCIA',
@@ -82,56 +73,43 @@ if __name__ == '__main__':
     print("\nexercicio 12\n",df.columns)
 
     #exercicio 13
-    def criarcoluna(condicao):
-        if condicao < 2:
-            return 'ruim'
-        elif condicao >= 3 and condicao <=4:
-            return 'regular'
-        else:
-            return 'bom'
-
-    df['DS_TIPO_CONDICAO'] = list(map(criarcoluna, df['condicao']))
+    df['DS_TIPO_CONDICAO'] = df['condicao'].map(lambda x : 'ruim' if x < 2 
+                                                else 'regular' if x >= 3 and x <= 4
+                                                else 'bom')
+   
 
     print("\nexercicio 13:\n", df['DS_TIPO_CONDICAO'])
 
     #exercicio 14
-    def corrigirpreco(valor):
-        if not valor.isalnum():
-            numero = valor.replace(',', '.')
-            numero = numero.split('E+')
-            return float(numero[0]) * 10 ** int(numero[1])
-        else:
-            return float(valor)
-
-    df['VL_PRECO'] = list(map(corrigirpreco, df['VL_PRECO']))
+    df['VL_PRECO'] = df['VL_PRECO'].apply(lambda x:x.replace(',','.')).astype('float')
     print("\nexercicio 14: \n",df[['id', 'VL_PRECO']].sort_values(by='VL_PRECO',ascending=False))
 
     #exercicio 15
-    print("\nexercicio 15: \nquantidade:",
-          df[df['DS_TIPO_CONDICAO'] == 'regular'].shape[0])
+    print("\nexercicio 15:\nquantidade:",
+        df.query("DS_TIPO_CONDICAO == 'regular'")['id'].count())
 
     #exercicio 16
     print("\nexercicio 16:\npreço médio: {:.2f}".
-          format(float(df[df['DS_TIPO_CONDICAO'] == 'regular'].filter(items=['VL_PRECO']).mean())))
+        format(df.query("DS_TIPO_CONDICAO == 'regular'")['VL_PRECO'].mean()))
 
     #exercicio 17
     print("\nexercicio 17:\npreço: {:.2f}".
-          format(float(df[df['QTD_QUARTOS'] == 3].filter(items=['VL_PRECO']).max())))
+        format(df.query('QTD_QUARTOS == 3')['VL_PRECO'].max()))
 
     #exercicio 18
     print("\nexercicio 18: \nquantidade: ",
-          df[(df['DS_TIPO_CONDICAO'] == 'bom') & (df['QTD_QUARTOS'] > 2) & (df['QTD_BANHEIROS'] > 2)].shape[0])
+        df.query("DS_TIPO_CONDICAO == 'bom' & QTD_QUARTOS > 2 & QTD_BANHEIROS > 2").shape[0])
 
     #exercicio 19
-    print("\nexercicio 19: \nid do preço max: ",
-          int(df[['id', 'VL_PRECO']].max().filter(items=['id'])))
-
-    print("\nexercicio 19: \nid do preço min: ",
-          int(df[['id', 'VL_PRECO']].min().filter(items=['id'])))
+    print("\nexercicio 19: \nid max:",
+        df.query("VL_PRECO == VL_PRECO.max()")['id'])
+   
+    print("\nexercicio 19: \nid min:",
+        df.query("VL_PRECO == VL_PRECO.min()")['id'])
 
     #exercicio 20
     print("\nexercicio 20: \n",
-          df[['DT_ANO_CONSTRUCAO']].min())
+          df['DT_ANO_CONSTRUCAO'].min())
 
     #exercicio 21
     print("\nexercicio 21: \n",
@@ -171,9 +149,9 @@ if __name__ == '__main__':
           df[['VL_PRECO','CD_CLASSIFICACAO']])
 
     #exercicio 27
-    df['CD_CLASSIFICACAO'] = list(map(lambda x: 0 if x < 321950 else
+    df['CD_CLASSIFICACAO'] = df['VL_PRECO'].map(lambda x: 0 if x < 321950 else
         1 if x >= 321950 and x <= 450000 else
-        2 if x> 450000 and x <= 645000 else 3, df['VL_PRECO']))
+        2 if x> 450000 and x <= 645000 else 3)
     print("\nexercicio 27: \n",
         df[['VL_PRECO', 'CD_CLASSIFICACAO']])
 
