@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas.core.reshape.merge import merge
 
 if __name__ == '__main__':
     def read_xlsx(path):
@@ -33,20 +34,15 @@ if __name__ == '__main__':
 
     #exercicio 3
     print('\nexercicio 3:\n', 
-        df_loja_a.set_index('ID').join(df_vendas.set_index('ID'), 
-                                        how='inner'))
+        pd.merge(df_loja_a, df_vendas, how='inner'))
     
     #exercicio 4
     print('\nexercicio 4:\n',
-        df_loja_b.set_index('ID').join(df_vendas.set_index('ID'), 
-                                        how='inner'))
+        pd.merge(df_loja_b, df_vendas, how='inner'))
 
     #exercicio 5
     print('\nexercicio 5:\n',
-        df_loja_a.set_index('ID').join(df_loja_b.set_index('ID'), 
-                                        how='inner', 
-                                        lsuffix='_cliente_a', 
-                                        rsuffix='_cliente_b'))
+        pd.merge(df_loja_a, df_loja_b, how='inner'))
     
     # exercicio 6
     print('\nexercicio 6:\n',
@@ -65,8 +61,7 @@ if __name__ == '__main__':
 
     # exercicio 9
     print('\nexercicio 9:\nTotal de gastos:', 
-        df_loja_a.set_index('ID').join(df_vendas.set_index('ID'), 
-                                        how='inner')['Valor'].sum())
+        pd.merge(df_loja_a, df_vendas, how='inner')['Valor'].sum())
 
     # exercicio 10    
     print(
@@ -86,29 +81,37 @@ if __name__ == '__main__':
                                             'TipoCliente_y',
                                             'Valor']))
     
+
     #exercicio 11
     print('\nexercicio 11:\n',
-        df_loja_a.set_index('ID')
-            .join(df_vendas.set_index('ID'))
-            .query('Valor == "NaN"'))
+       df_loja_a[
+                df_loja_a['ID']
+                    .isin(pd.merge(
+                                df_loja_a,
+                                df_vendas, 
+                                how='inner')['ID']) == False])
 
     #exercicio 12
     print('\nexercicio 12:\n',
-        df_loja_b.set_index('ID')
-            .join(df_vendas.set_index('ID'))
-            .query('Valor == "NaN"'))
+        df_loja_b[
+                df_loja_b['ID']
+                    .isin(pd.merge(
+                                df_loja_b, 
+                                df_vendas, 
+                                how='inner')['ID']) == False])
     
     #exercicio 13
     print('\nexercicio 13:\n',
-        df_clientes.set_index('ID')
-            .join(df_vendas.set_index('ID'))
-            .query('Valor == "NaN"')
+        df_clientes[
+                    df_clientes['ID']
+                        .isin(pd.merge(df_clientes, 
+                                        df_vendas, 
+                                        how='inner')['ID']) == False]
             .drop_duplicates())
 
     #exercicio 14
     print('\nexercicio 14:\n',
-        pd.merge(df_clientes, df_vendas, how='left')
-            .query('Valor != "NaN"')
+        pd.merge(df_clientes, df_vendas, how='inner')
             .drop_duplicates())
     
     #exercicio 15
